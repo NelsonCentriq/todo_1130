@@ -72,6 +72,19 @@ export default class App extends Component {
             {this.todoTableRows(false)}
           </tbody>
         </table>
+
+
+        {/* Features 6 and 7 */}
+        <table className="table table-striped table-bordered">
+          <thead>
+            <th>Action</th>
+            <th>Mark As Not Complete</th>
+          </thead>
+          <tbody>
+            {this.todoTableRows(true)}
+          </tbody>
+        </table>
+
       </div>
 
 
