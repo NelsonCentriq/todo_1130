@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { ToDoBanner } from './TODOBANNER';
 import { ToDoRow } from './TODOROW';
 import { ToDoCreator } from './TODOCREATOR';
+import { VisibilityControl } from './VISIBILITYCONTROL';
 import 'bootstrap/dist/css/bootstrap.css';
 
 export default class App extends Component {
@@ -48,33 +49,65 @@ export default class App extends Component {
         bob => bob.action === checkedToDoItem.action ? { ...bob, done: !bob.done } : bob
 
       )
-    }
+    }, () => localStorage.setItem("storedToDoObject", JSON.stringify(this.state))
   );
 
   //  Feature 5d
   //  The createNewTodoCallback method below is the callback for the ToDoCreator component
   //  The "newToDoAction" parameter passed into the createNewTodoCallback method below comes from where the callback is initiated from- which is in the createNewTodo method of the ToDoCreator Component
-  createNewToDoCallback = (newToDoAction) =>
-  {
-      //  The if block below checks if the newly created todo item is NOT already in the list of todos.  If it is NOT already in the list then it adds it as below.  If it is in the list already there is no else block so nothing happens - this is not too user friendly but.... :)
-      if (!this.state.todoList.find(xyz => xyz.action === newToDoAction)) {
-        this.setState(
-          {
-            todoList: [
-              ...this.state.todoList,
-              {action: newToDoAction, done: false}
-            ]
-            // By default every new todo should not be done- in other words it's done property should have a value of false.
-          }
-        )
-      }
+  createNewToDoCallback = (newToDoAction) => {
+    //  The if block below checks if the newly created todo item is NOT already in the list of todos.  If it is NOT already in the list then it adds it as below.  If it is in the list already there is no else block so nothing happens - this is not too user friendly but.... :)
+    if (!this.state.todoList.find(xyz => xyz.action === newToDoAction)) {
+      this.setState(
+        {
+          todoList: [
+            ...this.state.todoList,
+            { action: newToDoAction, done: false }
+          ]
+          // By default every new todo should not be done- in other words it's done property should have a value of false.
+        }, () =>
+        localStorage.setItem("storedToDoObject", JSON.stringify(this.state)
+        )  //  End of setItem
+      )  //  End of setState
+    }  //  End of If block
   }
 
   // Feature 5e
   //  The componentDidMount method below is a built in react method to handle logic for when the APP Component "mounts" or "loads"
-  componentDidMount = () =>
-  {
-    
+  componentDidMount = () => {
+    localStorage.clear();
+
+    fetch("http://localhost:49303/api/todos?todoOwnerID=1")
+      .then(response => response.json())
+      .then((data) => {
+        console.log(JSON.stringify({ data }));
+
+        var apiList = [];
+
+        for (var i = 0; i < data.Data.length; i++) {
+          var isDone = true;
+          if (data.Data[i].done === 0) {
+            isDone = false;
+          }
+
+          var element = { action: data.Data[i].action, done: isDone };
+          apiList.push(element);
+        }
+
+        let storedData = localStorage.getItem("storedToDoObject");
+        this.setState(
+          storedData != null ? JSON.parse(storedData) :
+            {
+              todoOwner: data.Data[0].todoOwner,
+              todoList: apiList,
+              showCompleted: true //  Feature 8
+            }
+        );
+
+      })
+      .catch(console.log);
+
+
   }
 
 
@@ -89,7 +122,7 @@ export default class App extends Component {
       {/* Feature 5a */}
       <ToDoCreator
         callback={this.createNewToDoCallback}
-     />
+      />
 
       {/* Features 3 and 4 */}
       <table className="table table-striped table-bordered">
@@ -102,8 +135,18 @@ export default class App extends Component {
         </tbody>
       </table>
 
+      {/* Feature 8 */}
+      <div className="bg-secondary text-white text-center p-2">
+        <VisibilityControl
+          description="Completed Tasks"
+          isChecked={this.state.showCompleted}
+          callback={checked => this.setState({showCompleted: checked})}
+        />
+      </div>
 
-      {/* Features 6 and 7 */}
+{/* Features 6 and 7 */}
+{this.state.showCompleted && 
+
       <table className="table table-striped table-bordered">
         <thead>
           <th>Action</th>
@@ -113,6 +156,8 @@ export default class App extends Component {
           {this.todoTableRows(true)}
         </tbody>
       </table>
+      
+}
 
     </div>
 
