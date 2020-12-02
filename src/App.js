@@ -2,6 +2,7 @@
 import './App.css';
 import React, {Component} from 'react';
 import {ToDoBanner} from './TODOBANNER';
+import 'bootstrap/dist/css/bootstrap.css';
 
 export default class App extends Component {
 //  Above we have created a class called App the extends the functionality of the Component class
