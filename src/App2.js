@@ -30,12 +30,12 @@ export default class App extends Component {
   //  Feature 3
   //  If the ToDoRow Component's "done" property experiences a change event (ie. checking the Mark Complete box in the UI) then the ToDoRow Component calls a callback method called toggleToDo (below)  and passes toggleToDo the checked todo item
   //  ----- Function to display table rows ------
-  ingredientRows = (finishedTask) => this.state.todoItems.filter(
-    x => x.done === finishedTask).map( y => 
+  ingredientRows = (finishedTask) => this.state.ingredientList.filter(
+    x => x.gotit === finishedTask).map( y => 
       <ToDoRow   
-        key={y.action}
+        key={y.ingredient}
         item={y}
-        callback={this.toggleToDo}  // The callback will be invoked (executed, run) when everything in <ToDoRow> is finished AND the user clicks the input box
+        callback={this.toggleGroceryItem}  // The callback will be invoked (executed, run) when everything in <ToDoRow> is finished AND the user clicks the input box
       />
     );
 
@@ -45,8 +45,8 @@ export default class App extends Component {
   //  When setState is invoked, React will make a new object with the changes.  Under the hood React will compare the new object with the DOM version of the object.  If there is a difference between those 2 objects then the DOM will get re-drawn (NOT a reload) and then we see the changes.
   toggleGroceryItem = (checkedTodoItem) => this.setState(
     {
-      todoItems: this.state.todoItems.map(
-        x => x.action === checkedTodoItem.action ? {x, done: !x.done} : x
+      ingredientList: this.state.ingredientList.map(
+        x => x.ingredient === checkedTodoItem.ingredient ? {x, gotit: !x.gotit} : x
       )
     }
   );
@@ -56,8 +56,8 @@ export default class App extends Component {
       {/*Features 1&2 */}
       {/* Below is referred to as a react stub */}
       <ToDoBanner
-        recipe={this.state.}
-        list={this.state.}
+        recipe={this.state.recipeName}
+        list={this.state.ingredientList}
       />
 
       {/* Feature 3 & 4 */}
@@ -67,7 +67,7 @@ export default class App extends Component {
           <th>Have It</th>
         </thead>
         <tbody>
-          {this.todoTableRows(false)}
+          {this.ingredientRows(false)}
         </tbody>
       </table>
 
@@ -78,7 +78,7 @@ export default class App extends Component {
           <th>Need It</th>
         </thead>
         <tbody>
-          {this.todoTableRows(true)}
+          {this.ingredientRows(true)}
         </tbody>
       </table>
 

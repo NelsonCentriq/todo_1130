@@ -5,8 +5,8 @@ export class ToDoBanner extends Component {
     //  Feature 1 & 2
     render = () =>
     <h4 className="bg-primary text-white text-center p-2">
-        {this.props.user}'s To Do List (
-            {this.props.todoItems.filter(www => !www.done)} items still not done
+        {this.props.recipe}'s To Do List (
+            {this.props.list.filter(www => !www.gotit)} items still not done
         )
     </h4>
 

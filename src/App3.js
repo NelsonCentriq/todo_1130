@@ -1,53 +1,47 @@
-//import logo from './logo.svg';
+import logo from './logo.svg';
 import './App.css';
 import React, { Component } from 'react';
 import { ToDoBanner } from './TODOBANNER';
 import { ToDoRow } from './TODOROW';
 import { ToDoCreator } from './TODOCREATOR';
-import { VisibilityControl } from './VISIBILITYCONTROL';
-import 'bootstrap/dist/css/bootstrap.css';
-
+import {VisibilityControl} from './VISIBILITYCONTROL';
 export default class App extends Component {
   //  Above we have created a class called App the extends the functionality of the Component class
-
   //  The export keyword above makes the class available for use outside of the JS file where it is created
-
   constructor() {
     super();
-
     //  React components have a special property called "state".  The "state" is used to define the state of data (props)
     this.state = {
-      todoOwner: "Shawn Nelson",
+      todoOwner: "Kolby",
       todoList: [
         { action: "Move burn pile", done: false },
-        { action: "Oil change", done: true },
-        { action: "Start x-mas shopping", done: false },
-        { action: "Pay November Sales Tax", done: false },
-        { action: "Eat breakfast", done: true }
+        { action: "Oil Change", done: false },
+        { action: "Clean Room", done: false },
+        { action: "X-mas Shopping", done: false },
+        { action: "Do hella gaming", done: true }
       ]
     }
-
-  }  // END OF CONSTRUCTOR
+  }// End of Constructor
 
   //  Feature 3 & 4
   //  If the ToDoRow Component's "done" property experiences a change event (ie. checking the Mark Complete box in the UI) then the ToDoRow Component calls a callback method called toggleToDo (below)  and passes toggleToDo the checked todo item
   //  ----- Function to display table rows ------
+
   todoTableRows = (finishedTask) => this.state.todoList.filter(
     x => x.done === finishedTask).map(y =>
       <ToDoRow
         key={y.action}
         item={y}
-        callback={this.toggleToDo}  // The callback will be invoked (executed, run) when everything in <ToDoRow> is finished AND the user clicks the input box
-      //  The data passed into the callback from the ToDoRow component is passed automatically into the function defined in the callback
+        callback={this.toggleToDo} // The callback will be invoked (executed, run) when everything in <ToDoRow> is finished AND the user clicks the input box
+      //  The data passed into the callback from the ToDoRow componet is passed automatically into the function defined in the callback
       />
     );
 
-  // ---------- Function to toggle an item from done to not done or vice-versa
+  //-----------------Function to toggle and item from done to not done or visversa
   toggleToDo = (checkedToDoItem) => this.setState(
     {
       todoList: this.state.todoList.map(
         bob => bob.action === checkedToDoItem.action ? { ...bob, done: !bob.done } : bob
-
       )
     }, () => localStorage.setItem("storedToDoObject", JSON.stringify(this.state))
   );
@@ -62,153 +56,115 @@ export default class App extends Component {
         {
           todoList: [
             ...this.state.todoList,
-            { action: newToDoAction, done: false }
+            {
+              action: newToDoAction, done: false // By default every new todo should not be done- in other words it's done property should have a value of false.
+            }
           ]
-          // By default every new todo should not be done- in other words it's done property should have a value of false.
-        }, () =>
-        localStorage.setItem("storedToDoObject", JSON.stringify(this.state)
-        )  //  End of setItem
-      );  //  End of setState
-
-      //  Feature 5.f
-      //  Insert the new todo into the DB
-      var myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-
-      var raw = JSON.stringify({"todoOwnerID": 1,"action": newToDoAction,"done": 0});
-
-      var requestOptions = {
-        method: 'POST',
-        headers: myHeaders,
-        body: raw,
-        redirect: 'follow'
-      };
-
-      fetch("http://localhost:49303/api/todos/CreateTodo", requestOptions)
-        .then(response => response.text())
-        .then(result => console.log(result))
-        .catch(error => console.log('error', error));
-
-    }  //  End of If block
+        }, () => localStorage.setItem("storedToDoObject", JSON.stringify(this.state))// end of setItem
+      )//end of setState
+    }// end of if block
   }
 
   // Feature 5e
   //  The componentDidMount method below is a built in react method to handle logic for when the APP Component "mounts" or "loads"
   componentDidMount = () => {
     localStorage.clear();
-
-    fetch("http://localhost:49303/api/todos/GetTodos?todoOwnerID=1")
+    // http://localhost:49303/api/todos?todoOwnerID=1
+    // http://localhost:56881/api/todos?todoOwnerID=1
+    fetch("http://localhost:49303/api/todos?todoOwnerID=1")
       .then(response => response.json())
       .then((data) => {
         console.log(JSON.stringify({ data }));
 
         var apiList = [];
-
         for (var i = 0; i < data.Data.length; i++) {
           var isDone = true;
-          if (data.Data[i].done === 0) {
+          if (data.Data[i].Done === 0) {
             isDone = false;
           }
-
-          var element = { 
-            action: data.Data[i].action, 
-            done: isDone, 
-            todoID: data.Data[i].todoID 
-          };
-          
+          var element = { action: data.Data[i].action, done: isDone };
           apiList.push(element);
         }
-
         let storedData = localStorage.getItem("storedToDoObject");
         this.setState(
           storedData != null ? JSON.parse(storedData) :
             {
               todoOwner: data.Data[0].todoOwner,
               todoList: apiList,
-              showCompleted: true //  Feature 8
+              showCompleted: true // feature 8
             }
         );
-
-      })
-      .catch(console.log);
+      });
   }
 
   render = () =>
     <div>
-      {/* Features 1 & 2 */}
+      {/*Features 1 and 2*/}
       <ToDoBanner
+
         todoOwner={this.state.todoOwner}
         todoList={this.state.todoList}
+
       />
 
-      {/* Feature 5a */}
+      {/*feature 5a */}
       <ToDoCreator
         callback={this.createNewToDoCallback}
       />
-
-      {/* Features 3 and 4 */}
+      {/* Freatures 3 and 4*/}
       <table className="table table-striped table-bordered">
         <thead>
           <th>Action</th>
           <th>Mark As Complete</th>
-          <th>Delete</th>
         </thead>
         <tbody>
           {this.todoTableRows(false)}
         </tbody>
       </table>
 
-      {/* Feature 8 */}
-      <div className="bg-secondary text-white text-center p-2">
+      {/*feature 8*/}
+      <div className = "bg-secondary text-white text-center p-2">
         <VisibilityControl
-          description="Completed Tasks"
-          isChecked={this.state.showCompleted}
-          callback={checked => this.setState({showCompleted: checked})}
+        description = "Completed Tasks"
+        isChecked = {this.state.showCompleted}
+        callback= {checked => this.setState({showCompleted: checked})}
         />
       </div>
 
-{/* Features 6 and 7 */}
-{this.state.showCompleted && 
-
+{/* Freatures 6 and 7*/}
+  {this.state.showCompleted &&
       <table className="table table-striped table-bordered">
         <thead>
           <th>Action</th>
-          <th>Mark As Not Complete</th>
-          <th>Delete</th>
+          <th>Mark As NOT Complete</th>
         </thead>
         <tbody>
           {this.todoTableRows(true)}
         </tbody>
       </table>
-
 }
-
     </div>
+}// End of APP
 
+// function App() {
+//   return (
+//     <div className="App">
+//       <header className="App-header">
+//         <img src={logo} className="App-logo" alt="logo" />
+//         <p>
+//           Edit <code>src/App.js</code> and save to reload.
+//         </p>
+//         <a
+//           className="App-link"
+//           href="https://reactjs.org"
+//           target="_blank"
+//           rel="noopener noreferrer"
+//         >
+//           Learn React
+//         </a>
+//       </header>
+//     </div>
+//   );
+// }
 
-}  //  END OF APP
-
-/*
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
-*/
-
-//export default App;
+// export default App;
